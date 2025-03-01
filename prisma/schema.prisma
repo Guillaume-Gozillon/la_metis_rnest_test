@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int             @id @default(autoincrement())
+  username  String          @unique
+  role      Role
+  projects  Project[]       @relation("ProjectOwner")
+  accesses  ProjectAccess[]
+  analyses  Analysis[]      @relation("AnalysisOwner")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model Project {
+  id        Int             @id @default(autoincrement())
+  name      String
+  ownerId   Int
+  owner     User            @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  accesses  ProjectAccess[]
+  analyses  Analysis[]      @relation("ProjectAnalyses")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model ProjectAccess {
+  userId    Int
+  projectId Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@id([userId, projectId])
+}
+
+model Analysis {
+  id        Int      @id @default(autoincrement())
+  name      String
+  projectId Int
+  ownerId   Int
+  project   Project  @relation("ProjectAnalyses", fields: [projectId], references: [id], onDelete: Cascade)
+  owner     User     @relation("AnalysisOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  READER
+}
