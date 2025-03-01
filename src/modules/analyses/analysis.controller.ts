@@ -2,10 +2,12 @@ import { Hono } from 'hono'
 import { AnalysisService } from './analysis.service.js'
 import { authMiddleware } from '../../middlewares/auth.middleware.js'
 import type { User } from '@prisma/client'
+import { validateAnalysis } from '../../middlewares/analysisValidation.middleware.js'
 
 declare module 'hono' {
   interface ContextVariableMap {
     user: User
+    validatedBody: { name: string; accessUserIds?: number[] } | { name: string }
   }
 }
 
@@ -14,16 +16,21 @@ const analysisService = new AnalysisService()
 
 analysisRouter.use('*', authMiddleware)
 
-analysisRouter.post('/', async c => {
+analysisRouter.post('/', validateAnalysis, async c => {
   const user = c.get('user')
-  const projectIdParam = c.req.param('projectId')
 
+  const projectIdParam = c.req.param('projectId')
   if (!projectIdParam) {
-    return c.json({ error: 'Missing projectId in request' }, 400)
+    return c.json({ error: 'Missing projectId' }, 400)
+  }
+  const projectId = parseInt(projectIdParam, 10)
+  if (isNaN(projectId)) {
+    return c.json({ error: 'Invalid projectId' }, 400)
   }
 
-  const projectId = parseInt(projectIdParam, 10)
-  const body = await c.req.json<{ name: string }>()
+  const body = c.get('validatedBody') as {
+    name: string
+  }
 
   try {
     const analysis = await analysisService.createAnalysis(user, projectId, body)

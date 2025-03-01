@@ -10,7 +10,11 @@ projectRouter.use('*', authMiddleware)
 
 projectRouter.post('/', validateProject, async c => {
   const user = c.get('user')
-  const body = await c.req.json()
+
+  const body = c.get('validatedBody') as {
+    name: string
+    accessUserIds?: number[]
+  }
 
   try {
     const project = await projectService.createProject(user, body)
