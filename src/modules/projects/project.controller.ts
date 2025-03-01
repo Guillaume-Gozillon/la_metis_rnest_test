@@ -1,7 +1,9 @@
 import { Hono } from 'hono'
 import { ProjectService } from './project.service.js'
-import { authMiddleware } from '../../middlewares/auth.middleware.js'
-import { validateProject } from '../../middlewares/validation.middleware.js'
+import {
+  authMiddleware,
+  validateProject
+} from '../../middlewares/auth.middleware.js'
 
 export const projectRouter = new Hono()
 const projectService = new ProjectService()
@@ -10,7 +12,6 @@ projectRouter.use('*', authMiddleware)
 
 projectRouter.post('/', validateProject, async c => {
   const user = c.get('user')
-
   const body = c.get('validatedBody') as {
     name: string
     accessUserIds?: number[]
