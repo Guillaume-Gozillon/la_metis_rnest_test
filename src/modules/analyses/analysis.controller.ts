@@ -14,6 +14,25 @@ const analysisService = new AnalysisService()
 
 analysisRouter.use('*', authMiddleware)
 
+analysisRouter.post('/', async c => {
+  const user = c.get('user')
+  const projectIdParam = c.req.param('projectId')
+
+  if (!projectIdParam) {
+    return c.json({ error: 'Missing projectId in request' }, 400)
+  }
+
+  const projectId = parseInt(projectIdParam, 10)
+  const body = await c.req.json<{ name: string }>()
+
+  try {
+    const analysis = await analysisService.createAnalysis(user, projectId, body)
+    return c.json({ analysis }, 201)
+  } catch (e: any) {
+    return c.json({ error: e.message }, 400)
+  }
+})
+
 analysisRouter.get('/:projectId', async c => {
   const user = c.get('user')
   const projectId = parseInt(c.req.param('projectId'))
@@ -35,18 +54,6 @@ analysisRouter.get('/:analysisId', async c => {
     const analysis = await analysisService.getAnalysisById(user, analysisId)
     if (!analysis) return c.json({ error: 'Not Found' }, 404)
     return c.json({ analysis })
-  } catch (e: any) {
-    return c.json({ error: e.message }, 400)
-  }
-})
-
-analysisRouter.post('/:projectId', async c => {
-  const user = c.get('user')
-  const projectId = parseInt(c.req.param('projectId'))
-  const body = await c.req.json<{ name: string }>()
-  try {
-    const analysis = await analysisService.createAnalysis(user, projectId, body)
-    return c.json({ analysis }, 201)
   } catch (e: any) {
     return c.json({ error: e.message }, 400)
   }

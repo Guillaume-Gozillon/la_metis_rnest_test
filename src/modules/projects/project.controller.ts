@@ -11,6 +11,7 @@ projectRouter.use('*', authMiddleware)
 projectRouter.post('/', validateProject, async c => {
   const user = c.get('user')
   const body = await c.req.json()
+
   try {
     const project = await projectService.createProject(user, body)
     return c.json({ project }, 201)
@@ -21,8 +22,9 @@ projectRouter.post('/', validateProject, async c => {
 
 projectRouter.get('/', async c => {
   const user = c.get('user')
+
   try {
-    const projects = await projectService.getAllProjects(user)
+    const projects = await projectService.getAllProjects(user.id)
     return c.json({ projects })
   } catch (e: any) {
     return c.json({ error: e.message }, 500)
@@ -31,10 +33,13 @@ projectRouter.get('/', async c => {
 
 projectRouter.get('/:projectId', async c => {
   const user = c.get('user')
-  const projectId = parseInt(c.req.param('projectId'))
+  const projectId = parseInt(c.req.param('projectId'), 10)
+
   try {
     const project = await projectService.getProjectById(user, projectId)
-    if (!project) return c.json({ error: 'Not Found' }, 404)
+    if (!project) {
+      return c.json({ error: 'Not Found' }, 404)
+    }
     return c.json({ project })
   } catch (e: any) {
     return c.json({ error: e.message }, 500)
