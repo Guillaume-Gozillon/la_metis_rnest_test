@@ -16,6 +16,15 @@ const analysisService = new AnalysisService()
 
 analysisRouter.use('*', authMiddleware)
 
+/**
+ * POST /?projectId={projectId}
+ * Creates a new analysis.
+ *
+ * Middleware: validateAnalysis
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the created analysis or an error.
+ */
 analysisRouter.post('/', validateAnalysis, async c => {
   const user = c.get('user')
 
@@ -40,6 +49,13 @@ analysisRouter.post('/', validateAnalysis, async c => {
   }
 })
 
+/**
+ * GET /:projectId
+ * Retrieves all analyses associated with a specific project.
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the analyses or an error.
+ */
 analysisRouter.get('/:projectId', async c => {
   const user = c.get('user')
   const projectId = parseInt(c.req.param('projectId'))
@@ -54,6 +70,13 @@ analysisRouter.get('/:projectId', async c => {
   }
 })
 
+/**
+ * GET /:analysisId
+ * Retrieves a specific analysis by its Id.
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the analysis or an error if not found.
+ */
 analysisRouter.get('/:analysisId', async c => {
   const user = c.get('user')
   const analysisId = parseInt(c.req.param('analysisId'))

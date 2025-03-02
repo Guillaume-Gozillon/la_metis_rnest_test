@@ -10,6 +10,15 @@ const projectService = new ProjectService()
 
 projectRouter.use('*', authMiddleware)
 
+/**
+ * POST /
+ * Creates a new project.
+ *
+ * Middleware: validateProject
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the created project or an error.
+ */
 projectRouter.post('/', validateProject, async c => {
   const user = c.get('user')
   const body = c.get('validatedBody') as {
@@ -25,6 +34,13 @@ projectRouter.post('/', validateProject, async c => {
   }
 })
 
+/**
+ * GET /
+ * Retrieves all projects for the authenticated user.
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the list of projects or an error.
+ */
 projectRouter.get('/', async c => {
   const user = c.get('user')
 
@@ -36,6 +52,13 @@ projectRouter.get('/', async c => {
   }
 })
 
+/**
+ * GET /:projectId
+ * Retrieves a specific project by its ID.
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the project or an error if not found.
+ */
 projectRouter.get('/:projectId', async c => {
   const user = c.get('user')
   const projectId = parseInt(c.req.param('projectId'), 10)

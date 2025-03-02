@@ -4,6 +4,17 @@ import { UserService } from './user.service.js'
 export const userRouter = new Hono()
 const userService = new UserService()
 
+/**
+ * POST /
+ * Creates a new user.
+ *
+ * Expects a JSON body with:
+ * - username: string
+ * - role: string
+ *
+ * @param {import('hono').Context} c - The Hono context.
+ * @returns {Promise<Response>} JSON response with the created user or an error.
+ */
 userRouter.post('/', async c => {
   const body = await c.req.json<{ username: string; role: string }>()
   if (!body.username || !body.role) {
